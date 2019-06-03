@@ -4,7 +4,16 @@ Implement a **GraphQL server with TypeScript** based on Prisma, [apollo-server](
 
 ## Getting Started
 
-### 1. Download example & install dependencies
+### 1. Prisma CLI
+
+Install Prisma CLI to run the server
+
+```bash
+npm i -g prisma
+```
+
+
+### 2. Install
 
 Clone the repository:
 
@@ -19,62 +28,96 @@ cd graphql-apollo-server
 npm i
 ```
 
-### 2. Prisma CLI
+### 3. Docker Compose
 
-Install Prisma CLI to run the server
+Ensure you have Docker installed on your machine. If not, you can get it from [here](https://store.docker.com/search?offering=community&type=edition).
 
-```bash
-npm i -g prisma
+Review `docker-compose.yml` for MySQL
+
+```yml
+version: '3'
+services:
+	prisma:
+		image: prismagraphql/prisma:1.34
+		restart: always
+		ports:
+		- "4466:4466"
+		environment:
+			PRISMA_CONFIG: |
+				port: 4466
+				databases:
+					default:
+						connector: mysql
+						host: mysql
+						port: 3306
+						user: root
+						password: prisma
+						migrations: true
+	mysql:
+		image: mysql:5.7
+		restart: always
+		environment:
+			MYSQL_ROOT_PASSWORD: prisma
+		volumes:
+			- mysql:/var/lib/mysql
+volumes:
+	mysql:
 ```
 
-### 4. Docker Compose
+Run docker to create database
+```bash
+docker-compose up -d
+```
 
-1. Ensure you have Docker installed on your machine. If not, you can get it from [here](https://store.docker.com/search?offering=community&type=edition).
-1. Create `docker-compose.yml` for MySQL (see [here](https://www.prisma.io/docs/prisma-server/database-connector-POSTGRES-jgfr/) for Postgres):
-    ```yml
-    version: '3'
-    services:
-      prisma:
-        image: prismagraphql/prisma:1.34
-        restart: always
-        ports:
-        - "4466:4466"
-        environment:
-          PRISMA_CONFIG: |
-            port: 4466
-            databases:
-              default:
-                connector: mysql
-                host: mysql
-                port: 3306
-                user: root
-                password: prisma
-                migrations: true
-      mysql:
-        image: mysql:5.7
-        restart: always
-        environment:
-          MYSQL_ROOT_PASSWORD: prisma
-        volumes:
-          - mysql:/var/lib/mysql
-    volumes:
-      mysql:
-    ```
-1. Run `docker-compose up -d`
-1. Set the `endpoint` in `prisma.yml` to `http://localhost:4466`
 
-### 5. GraphQL Server
-Start graphql server -- next we will deploy the data
+### 4. Endpoint
+
+Create `prisma/prisma.yml` which sets the enpoint on your localhost (default 4466):
 
 ```bash
-npm run start
+touch prisma/prisma.yml
+```
+
+Copy the code below and paste into prisma.yml
+
+```yml
+
+# Specifies the HTTP endpoint of your Prisma API.
+endpoint: 'http://localhost:4466'
+
+# Defines your models, each model is mapped to the database as a table.
+datamodel: datamodel.prisma
+
+# Specifies the language and directory for the generated Prisma client.
+generate:
+	- generator: typescript-client
+		output: ../src/generated/prisma-client/
+
+# Ensures Prisma client is re-generated after a datamodel change.
+hooks:
+	post-deploy:
+		- prisma generate
+		- npx nexus-prisma-generate --client ./src/generated/prisma-client --output ./src/generated/nexus-prisma # Runs the codegen tool from nexus-prisma.
+
+# Seeds initial data into the database by running a script.
+seed:
+	run: yarn ts-node ./prisma/seed.ts
+```
+
+### 5. GraphQL Server
+Start the graphql server
+
+```bash
+npm start
 ```
 
 Navigate to [http://localhost:4000](http://localhost:4000) in your browser to explore the API of your GraphQL server in a [GraphQL Playground](https://github.com/prisma/graphql-playground).
 
 
-### 6. Database Setup
+### 6. Data
 For this example, you'll use a free _demo database_ (AWS Aurora) hosted in Prisma Cloud.
+
+Open a new Terminal shell and deploy data to the database
 ```bash
 prisma deploy
 ```
@@ -85,9 +128,7 @@ The schema that specifies the API operations of your GraphQL server is defined i
 
 Feel free to adjust any operation by adding or removing fields. The GraphQL Playground helps you with its auto-completion and query validation features.
 
-
-### 7. Query and Mutatate Data
-Lets do this :)
+## Query
 
 #### Retrieve all published posts and their authors
 
@@ -107,14 +148,15 @@ query {
 }
 ```
 
+## Mutation
 
-#### Create a new user
+####Create a new user
 
 ```graphql
 mutation {
   signupUser(
-    name: "Sarah"
-    email: "sarah@prisma.io"
+    name: "Flavio"
+    email: "flavio@webshield.io"
   ) {
     id
   }
@@ -126,9 +168,9 @@ mutation {
 ```graphql
 mutation {
   createDraft(
-    title: "Join the Prisma Slack"
-    content: "https://slack.prisma.io"
-    authorEmail: "alice@prisma.io"
+    title: "See what Webshield and our partners are doing."
+    content: "https://webshield.io/partners"
+    authorEmail: "flavio@webshield.io"
   ) {
     id
     published
@@ -136,7 +178,23 @@ mutation {
 }
 ```
 
+This will return an id that you will use to publish
+
+```json
+{
+  "data": {
+    "publish": {
+      "id": "cjwgekemk004x0894zsfvjple",
+      "published": true
+    }
+  }
+}
+```
+
+
 #### Publish an existing draft
+
+Use id returned from previous 
 
 ```graphql
 mutation {
@@ -146,8 +204,6 @@ mutation {
   }
 }
 ```
-
-> **Note**: You need to replace the `__POST_ID__`-placeholder with an actual `id` from a `Post` item. You can find one e.g. using the `filterPosts`-query.
 
 #### Search for posts with a specific title or content
 
@@ -169,6 +225,8 @@ mutation {
 
 #### Retrieve a single post
 
+Use id returned from previous 
+
 ```graphql
 {
   post(id: "__POST_ID__") {
@@ -185,9 +243,9 @@ mutation {
 }
 ```
 
-> **Note**: You need to replace the `__POST_ID__`-placeholder with an actual `id` from a `Post` item. You can find one e.g. using the `filterPosts`-query.
-
 #### Delete a post
+
+Use id returned from previous 
 
 ```graphql
 mutation {
@@ -196,9 +254,6 @@ mutation {
   }
 }
 ```
-
-> **Note**: You need to replace the `__POST_ID__`-placeholder with an actual `id` from a `Post` item. You can find one e.g. using the `filterPosts`-query.
-
 
 ### 6. Changing the GraphQL schema
 
