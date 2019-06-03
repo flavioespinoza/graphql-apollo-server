@@ -12,7 +12,6 @@ Install Prisma CLI to run the server
 npm i -g prisma
 ```
 
-
 ### 2. Install
 
 Clone the repository:
@@ -34,41 +33,41 @@ Ensure you have Docker installed on your machine. If not, you can get it from [h
 
 Review `docker-compose.yml` for MySQL
 
-```yml
+```yaml
 version: '3'
 services:
-	prisma:
-		image: prismagraphql/prisma:1.34
-		restart: always
-		ports:
-		- "4466:4466"
-		environment:
-			PRISMA_CONFIG: |
-				port: 4466
-				databases:
-					default:
-						connector: mysql
-						host: mysql
-						port: 3306
-						user: root
-						password: prisma
-						migrations: true
-	mysql:
-		image: mysql:5.7
-		restart: always
-		environment:
-			MYSQL_ROOT_PASSWORD: prisma
-		volumes:
-			- mysql:/var/lib/mysql
+  prisma:
+    image: prismagraphql/prisma:1.34
+    restart: always
+    ports:
+    - "4466:4466"
+    environment:
+      PRISMA_CONFIG: |
+        port: 4466
+        databases:
+          default:
+            connector: mysql
+            host: mysql
+            port: 3306
+            user: root
+            password: prisma
+            migrations: true
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: prisma
+    volumes:
+      - mysql:/var/lib/mysql
 volumes:
-	mysql:
+  mysql:
 ```
+
 
 Run docker to create database
 ```bash
 docker-compose up -d
 ```
-
 
 ### 4. Endpoint
 
@@ -80,8 +79,7 @@ touch prisma/prisma.yml
 
 Copy the code below and paste into prisma.yml
 
-```yml
-
+```yaml
 # Specifies the HTTP endpoint of your Prisma API.
 endpoint: 'http://localhost:4466'
 
@@ -90,18 +88,18 @@ datamodel: datamodel.prisma
 
 # Specifies the language and directory for the generated Prisma client.
 generate:
-	- generator: typescript-client
-		output: ../src/generated/prisma-client/
+  - generator: typescript-client
+    output: ../src/generated/prisma-client/
 
 # Ensures Prisma client is re-generated after a datamodel change.
 hooks:
-	post-deploy:
-		- prisma generate
-		- npx nexus-prisma-generate --client ./src/generated/prisma-client --output ./src/generated/nexus-prisma # Runs the codegen tool from nexus-prisma.
+  post-deploy:
+    - prisma generate
+    - npx nexus-prisma-generate --client ./src/generated/prisma-client --output ./src/generated/nexus-prisma # Runs the codegen tool from nexus-prisma.
 
 # Seeds initial data into the database by running a script.
 seed:
-	run: yarn ts-node ./prisma/seed.ts
+  run: yarn ts-node ./prisma/seed.ts
 ```
 
 ### 5. GraphQL Server
