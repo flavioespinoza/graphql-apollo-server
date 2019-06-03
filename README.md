@@ -63,8 +63,8 @@ volumes:
   mysql:
 ```
 
+Run `docker-compose`
 
-Run docker to create database
 ```bash
 docker-compose up -d
 ```
@@ -111,6 +111,9 @@ npm start
 
 Navigate to [http://localhost:4000](http://localhost:4000) in your browser to explore the API of your GraphQL server in a [GraphQL Playground](https://github.com/prisma/graphql-playground).
 
+You can now use Prisma Admin to view and edit your data by appending /_admin to your Prisma endpoint.
+
+[http://localhost:4000/_admin](http://localhost:4000/_admin)
 
 ### 6. Data
 For this example, you'll use a free _demo database_ (AWS Aurora) hosted in Prisma Cloud.
