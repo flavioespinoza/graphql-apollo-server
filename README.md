@@ -8,20 +8,8 @@ Implement a **GraphQL server with TypeScript** based on Prisma, [apollo-server](
 
 Clone the repository:
 
-
-
 ```bash
-echo "# graphql-apollo-server" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git remote add origin https://github.com/flavioespinoza/graphql-apollo-server.git
-git push -u origin master
-```
-
-
-```bash
-https://github.com/flavioespinoza/graphql-apollo-server.git
+git clone https://github.com/flavioespinoza/graphql-apollo-server.git
 ```
 
 Install Node dependencies:
