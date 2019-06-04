@@ -9,3 +9,6 @@ tmp-resolvers
 package-lock.json
 flow-typed
 yarn.lock
+
+# Playground
+scratch/

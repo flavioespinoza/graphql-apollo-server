@@ -5,6 +5,17 @@ import * as path from 'path'
 import datamodelInfo from './generated/nexus-prisma'
 import { prisma } from './generated/prisma-client'
 
+// const __User = prismaObjectType({
+// 	name: 'User',
+// 	definition(t) {
+// 		t.prismaFields([
+// 			'id',
+// 			'type',
+// 			'userName'
+// 		])
+// 	}
+// })
+
 const User = prismaObjectType({
   name: 'User',
   definition(t) {

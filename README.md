@@ -1,135 +1,103 @@
 # graphql-apollo-server
 
-Implement a **GraphQL server with TypeScript** based on Prisma, [apollo-server](https://www.apollographql.com/docs/apollo-server/) and [GraphQL Nexus](https://graphql-nexus.com/).
+This example shows how to implement a **GraphQL server with TypeScript** based on Prisma, [apollo-server](https://www.apollographql.com/docs/apollo-server/) and [GraphQL Nexus](https://graphql-nexus.com/).
 
-## Getting Started
+## How to use
 
-### 1. Prisma CLI
-
-Install Prisma CLI to run the server
-
-```bash
-npm i -g prisma
-```
-
-### 2. Install
+### 1. Download example & install dependencies
 
 Clone the repository:
 
-```bash
-git clone https://github.com/flavioespinoza/graphql-apollo-server.git
+```
+git clone git@github.com:prisma/prisma-examples.git
 ```
 
 Install Node dependencies:
 
-```bash
-cd graphql-apollo-server
-npm i
+```
+cd prisma-examples/typescript/graphql-apollo-server
+npm install
 ```
 
-### 3. Docker Compose
+### 2. Install the Prisma CLI
 
-Ensure you have Docker installed on your machine. If not, you can get it from [here](https://store.docker.com/search?offering=community&type=edition).
+To run the example, you need the Prisma CLI. Please install it via NPM or [using another method](https://www.prisma.io/docs/prisma-cli-and-configuration/using-the-prisma-cli-alx4/#installation):
 
-Review `docker-compose.yml` for MySQL
+```
+npm install -g prisma
+```
 
-```yaml
-version: '3'
-services:
-  prisma:
-    image: prismagraphql/prisma:1.34
-    restart: always
-    ports:
-    - "4466:4466"
-    environment:
-      PRISMA_CONFIG: |
-        port: 4466
-        databases:
-          default:
-            connector: mysql
-            host: mysql
-            port: 3306
-            user: root
-            password: prisma
-            migrations: true
-  mysql:
-    image: mysql:5.7
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: prisma
+### 3. Set up database & deploy Prisma datamodel
+
+For this example, you'll use a free _demo database_ (AWS Aurora) hosted in Prisma Cloud. To set up your database, run:
+
+```
+prisma deploy
+```
+
+Then, follow these steps in the interactive CLI wizard:
+
+1. Select **Demo server**
+1. **Authenticate** with Prisma Cloud in your browser (if necessary)
+1. Back in your terminal, **confirm all suggested values**
+
+<details>
+ <summary>Alternative: Run Prisma locally via Docker</summary>
+
+1. Ensure you have Docker installed on your machine. If not, you can get it from [here](https://store.docker.com/search?offering=community&type=edition).
+1. Create `docker-compose.yml` for MySQL (see [here](https://www.prisma.io/docs/prisma-server/database-connector-POSTGRES-jgfr/) for Postgres):
+    ```yml
+    version: '3'
+    services:
+      prisma:
+        image: prismagraphql/prisma:1.34
+        restart: always
+        ports:
+        - "4466:4466"
+        environment:
+          PRISMA_CONFIG: |
+            port: 4466
+            databases:
+              default:
+                connector: mysql
+                host: mysql
+                port: 3306
+                user: root
+                password: prisma
+                migrations: true
+      mysql:
+        image: mysql:5.7
+        restart: always
+        environment:
+          MYSQL_ROOT_PASSWORD: prisma
+        volumes:
+          - mysql:/var/lib/mysql
     volumes:
-      - mysql:/var/lib/mysql
-volumes:
-  mysql:
+      mysql:
+    ```
+1. Run `docker-compose up -d`
+1. Set the `endpoint` in `prisma.yml` to `http://localhost:4466`
+1. Run `prisma deploy`
+
+</details>
+
+You can now use [Prisma Admin](https://www.prisma.io/docs/prisma-admin/overview-el3e/) to view and edit your data by appending `/_admin` to your Prisma endpoint.
+
+### 4. Start the GraphQL server
+
+Launch your GraphQL server with this command:
+
 ```
-
-Run `docker-compose`
-
-```bash
-docker-compose up -d
-```
-
-### 4. Endpoint
-
-Create `prisma/prisma.yml` which sets the enpoint on your localhost (default 4466):
-
-```bash
-touch prisma/prisma.yml
-```
-
-Copy the code below and paste into prisma.yml
-
-```yaml
-# Specifies the HTTP endpoint of your Prisma API.
-endpoint: 'http://localhost:4466'
-
-# Defines your models, each model is mapped to the database as a table.
-datamodel: datamodel.prisma
-
-# Specifies the language and directory for the generated Prisma client.
-generate:
-  - generator: typescript-client
-    output: ../src/generated/prisma-client/
-
-# Ensures Prisma client is re-generated after a datamodel change.
-hooks:
-  post-deploy:
-    - prisma generate
-    - npx nexus-prisma-generate --client ./src/generated/prisma-client --output ./src/generated/nexus-prisma # Runs the codegen tool from nexus-prisma.
-
-# Seeds initial data into the database by running a script.
-seed:
-  run: yarn ts-node ./prisma/seed.ts
-```
-
-### 5. GraphQL Server
-Start the graphql server
-
-```bash
-npm start
+npm run start
 ```
 
 Navigate to [http://localhost:4000](http://localhost:4000) in your browser to explore the API of your GraphQL server in a [GraphQL Playground](https://github.com/prisma/graphql-playground).
 
-You can now use Prisma Admin to view and edit your data by appending /_admin to your Prisma endpoint.
-
-[http://localhost:4000/_admin](http://localhost:4000/_admin)
-
-### 6. Data
-For this example, you'll use a free _demo database_ (AWS Aurora) hosted in Prisma Cloud.
-
-Open a new Terminal shell and deploy data to the database
-```bash
-prisma deploy
-```
-
-### 6. Using the GraphQL API
+### 5. Using the GraphQL API
 
 The schema that specifies the API operations of your GraphQL server is defined in [`./src/schema.graphql`](./src/schema.graphql). Below are a number of operations that you can send to the API using the GraphQL Playground.
 
 Feel free to adjust any operation by adding or removing fields. The GraphQL Playground helps you with its auto-completion and query validation features.
-
-## Query
 
 #### Retrieve all published posts and their authors
 
@@ -149,15 +117,15 @@ query {
 }
 ```
 
-## Mutation
+<Details><Summary><strong>See more API operations</strong></Summary>
 
-####Create a new user
+#### Create a new user
 
 ```graphql
 mutation {
   signupUser(
-    name: "Flavio"
-    email: "flavio@webshield.io"
+    name: "Sarah"
+    email: "sarah@prisma.io"
   ) {
     id
   }
@@ -169,9 +137,9 @@ mutation {
 ```graphql
 mutation {
   createDraft(
-    title: "See what Webshield and our partners are doing."
-    content: "https://webshield.io/partners"
-    authorEmail: "flavio@webshield.io"
+    title: "Join the Prisma Slack"
+    content: "https://slack.prisma.io"
+    authorEmail: "alice@prisma.io"
   ) {
     id
     published
@@ -179,23 +147,7 @@ mutation {
 }
 ```
 
-This will return an id that you will use to publish
-
-```json
-{
-  "data": {
-    "publish": {
-      "id": "cjwgekemk004x0894zsfvjple",
-      "published": true
-    }
-  }
-}
-```
-
-
 #### Publish an existing draft
-
-Use id returned from previous 
 
 ```graphql
 mutation {
@@ -205,6 +157,8 @@ mutation {
   }
 }
 ```
+
+> **Note**: You need to replace the `__POST_ID__`-placeholder with an actual `id` from a `Post` item. You can find one e.g. using the `filterPosts`-query.
 
 #### Search for posts with a specific title or content
 
@@ -226,8 +180,6 @@ mutation {
 
 #### Retrieve a single post
 
-Use id returned from previous 
-
 ```graphql
 {
   post(id: "__POST_ID__") {
@@ -244,9 +196,9 @@ Use id returned from previous
 }
 ```
 
-#### Delete a post
+> **Note**: You need to replace the `__POST_ID__`-placeholder with an actual `id` from a `Post` item. You can find one e.g. using the `filterPosts`-query.
 
-Use id returned from previous 
+#### Delete a post
 
 ```graphql
 mutation {
@@ -256,13 +208,17 @@ mutation {
 }
 ```
 
+> **Note**: You need to replace the `__POST_ID__`-placeholder with an actual `id` from a `Post` item. You can find one e.g. using the `filterPosts`-query.
+
+</Details>
+
 ### 6. Changing the GraphQL schema
 
 To make changes to the GraphQL schema, you need to manipulate the `Query` and `Mutation` types that are defined in [`index.ts`](./src/index.ts). 
 
 Note that the [`start`](./package.json#L6) script also starts a development server that automatically updates your schema every time you save a file. This way, the auto-generated [GraphQL schema](./src/generated/schema.graphql) updates whenever you make changes in to the `Query` or `Mutation` types inside your TypeScript code.
 
-## Prisma Resources
+## Next steps
 
 - [Use Prisma with an existing database](https://www.prisma.io/docs/-t003/)
 - [Explore the Prisma client API](https://www.prisma.io/client/client-typescript)
