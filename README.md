@@ -44,7 +44,7 @@ Then, follow these steps in the interactive CLI wizard:
 1. **Authenticate** with Prisma Cloud in your browser (if necessary)
 1. Back in your terminal, **confirm all suggested values**
 
-### 3.1 Docker Compose Alternative
+### 3.1 Docker Alternative
 <details>
  <summary>Run Prisma locally via Docker</summary>
 
