@@ -1,20 +1,23 @@
 # graphql-apollo-server
 
-This example shows how to implement a **GraphQL server with TypeScript** based on Prisma, [apollo-server](https://www.apollographql.com/docs/apollo-server/) and [GraphQL Nexus](https://graphql-nexus.com/).
+Implement a **GraphQL server** with **TypeScript** based on:
+- [Prisma](https://prisma.io/)
+- [Apollo Server](https://www.apollographql.com/docs/apollo-server/)
+- [GraphQL Nexus](https://graphql-nexus.com/)
 
-## How to use
+## Getting Started
 
-### 1. Download example & install dependencies
+### 1. Download & install dependencies
 
 Clone the repository:
 
-```
+```bash
 git clone git@github.com:prisma/prisma-examples.git
 ```
 
 Install Node dependencies:
 
-```
+```bash
 cd prisma-examples/typescript/graphql-apollo-server
 npm install
 ```
@@ -23,7 +26,7 @@ npm install
 
 To run the example, you need the Prisma CLI. Please install it via NPM or [using another method](https://www.prisma.io/docs/prisma-cli-and-configuration/using-the-prisma-cli-alx4/#installation):
 
-```
+```bash
 npm install -g prisma
 ```
 
@@ -31,7 +34,7 @@ npm install -g prisma
 
 For this example, you'll use a free _demo database_ (AWS Aurora) hosted in Prisma Cloud. To set up your database, run:
 
-```
+```bash
 prisma deploy
 ```
 
@@ -41,12 +44,13 @@ Then, follow these steps in the interactive CLI wizard:
 1. **Authenticate** with Prisma Cloud in your browser (if necessary)
 1. Back in your terminal, **confirm all suggested values**
 
+### 3.1 Docker Compose Alternative
 <details>
- <summary>Alternative: Run Prisma locally via Docker</summary>
+ <summary>Run Prisma locally via Docker</summary>
 
 1. Ensure you have Docker installed on your machine. If not, you can get it from [here](https://store.docker.com/search?offering=community&type=edition).
 1. Create `docker-compose.yml` for MySQL (see [here](https://www.prisma.io/docs/prisma-server/database-connector-POSTGRES-jgfr/) for Postgres):
-    ```yml
+    ```yaml
     version: '3'
     services:
       prisma:
@@ -77,7 +81,12 @@ Then, follow these steps in the interactive CLI wizard:
     ```
 1. Run `docker-compose up -d`
 1. Set the `endpoint` in `prisma.yml` to `http://localhost:4466`
-1. Run `prisma deploy`
+1. Deploy with prisma
+
+	```bash
+	prisma deploy
+	```
+
 
 </details>
 
@@ -87,7 +96,7 @@ You can now use [Prisma Admin](https://www.prisma.io/docs/prisma-admin/overview-
 
 Launch your GraphQL server with this command:
 
-```
+```bash
 npm run start
 ```
 
